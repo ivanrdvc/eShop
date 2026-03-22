@@ -1,4 +1,4 @@
-﻿namespace eShop.Ordering.Infrastructure.EntityConfigurations;
+namespace eShop.Ordering.Infrastructure.EntityConfigurations;
 
 class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
 {
@@ -29,6 +29,9 @@ class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
 
         orderConfiguration.Property(o => o.Carrier)
             .HasMaxLength(50);
+
+        orderConfiguration.Property(o => o.ShippingNotificationSent)
+            .HasDefaultValue(false);
 
         orderConfiguration.HasOne<PaymentMethod>()
             .WithMany()
