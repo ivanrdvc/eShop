@@ -20,15 +20,15 @@ namespace eShop.OrderProcessor.Services
                 Timestamp = DateTime.UtcNow
             };
 
+            using var client = httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(10);
+
             for (int attempt = 1; attempt <= MaxRetryAttempts; attempt++)
             {
                 try
                 {
                     logger.LogInformation("Sending notification for order {OrderId}, attempt {Attempt}/{MaxAttempts}",
                         orderId, attempt, MaxRetryAttempts);
-
-                    using var client = httpClientFactory.CreateClient();
-                    client.Timeout = TimeSpan.FromSeconds(10);
 
                     var response = await client.PostAsJsonAsync(NotificationEndpoint, payload);
                     response.EnsureSuccessStatusCode();
