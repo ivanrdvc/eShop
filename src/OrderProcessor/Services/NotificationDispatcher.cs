@@ -44,13 +44,6 @@ namespace eShop.OrderProcessor.Services
                         orderId, attempt, delay.TotalSeconds);
                     await Task.Delay(delay);
                 }
-                catch (TaskCanceledException ex) when (attempt < MaxRetryAttempts && ex.InnerException is TimeoutException)
-                {
-                    var delay = TimeSpan.FromSeconds(Math.Pow(2, attempt));
-                    logger.LogWarning(ex, "Timeout sending notification for order {OrderId} on attempt {Attempt}. Retrying in {Delay}s",
-                        orderId, attempt, delay.TotalSeconds);
-                    await Task.Delay(delay);
-                }
             }
 
             logger.LogError("Failed to send notification for order {OrderId} after {MaxAttempts} attempts",
