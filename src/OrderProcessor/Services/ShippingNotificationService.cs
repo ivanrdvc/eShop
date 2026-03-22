@@ -137,12 +137,12 @@ namespace eShop.OrderProcessor.Services
                 using var catalogConn = new NpgsqlConnection(catalogConnectionString);
                 using var catalogCommand = catalogConn.CreateCommand();
 
-                var idList = string.Join(",", productIds);
-                catalogCommand.CommandText = $"""
+                catalogCommand.CommandText = """
                     SELECT "Id", "Name", "PictureFileName"
                     FROM catalog."Catalog"
-                    WHERE "Id" IN ({idList})
+                    WHERE "Id" = ANY(@ProductIds)
                     """;
+                catalogCommand.Parameters.AddWithValue("ProductIds", productIds.ToArray());
 
                 List<OrderItemProductInfo> items = [];
 
