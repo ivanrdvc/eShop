@@ -1,4 +1,4 @@
-﻿namespace eShop.Ordering.Infrastructure.Repositories;
+namespace eShop.Ordering.Infrastructure.Repositories;
 
 public class OrderRepository
     : IOrderRepository
@@ -45,16 +45,12 @@ public class OrderRepository
         var maxOrderAgeDays = 30;
         var cutoffDate = DateTime.UtcNow.AddDays(-maxOrderAgeDays);
 
-        var orders = await _context.Orders
+        return await _context.Orders
             .Include(o => o.OrderItems)
             .Where(o => o.OrderStatus == OrderStatus.Paid)
             .Where(o => o.OrderDate >= cutoffDate)
-            .ToListAsync();
-
-        // Only ship orders that meet the minimum value and have at least one item
-        return orders
             .Where(o => o.OrderItems.Count > 0)
             .Where(o => o.OrderItems.Sum(i => i.Units * i.UnitPrice) >= minimumOrderValue)
-            .ToList();
+            .ToListAsync();
     }
 }
