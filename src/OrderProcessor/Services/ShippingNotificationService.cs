@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
@@ -5,9 +6,9 @@ namespace eShop.OrderProcessor.Services
 {
     public class ShippingNotificationService(
         IOptions<BackgroundTaskOptions> options,
-        IConfiguration configuration,
         ILogger<ShippingNotificationService> logger,
-        NpgsqlDataSource dataSource) : BackgroundService
+        NpgsqlDataSource dataSource,
+        [FromKeyedServices("catalog")] NpgsqlDataSource catalogDataSource) : BackgroundService
     {
         private readonly BackgroundTaskOptions _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
@@ -133,8 +134,7 @@ namespace eShop.OrderProcessor.Services
 
                 // Query catalog DB directly for product names and images — faster than
                 // calling the Catalog API and avoids adding an HTTP dependency here
-                var catalogConnectionString = configuration.GetConnectionString("catalogdb");
-                using var catalogConn = new NpgsqlConnection(catalogConnectionString);
+                using var catalogConn = catalogDataSource.CreateConnection();
                 using var catalogCommand = catalogConn.CreateCommand();
 
                 catalogCommand.CommandText = """
