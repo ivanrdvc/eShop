@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace eShop.Ordering.Domain.AggregatesModel.OrderAggregate;
 
@@ -16,7 +16,7 @@ public class Order
     public Buyer Buyer { get; }
 
     public OrderStatus OrderStatus { get; private set; }
-    
+
     public string Description { get; private set; }
 
     // Draft orders have this set to true. Currently we don't check anywhere the draft status of an Order, but we could do it if needed
@@ -29,13 +29,15 @@ public class Order
     // so OrderItems cannot be added from "outside the AggregateRoot" directly to the collection,
     // but only through the method OrderAggregateRoot.AddOrderItem() which includes behavior.
     private readonly List<OrderItem> _orderItems;
-   
+
     public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
 
     public int? PaymentId { get; private set; }
 
     public string TrackingNumber { get; private set; }
     public string Carrier { get; private set; }
+
+    public bool ShippingNotificationSent { get; private set; }
 
     public static Order NewDraft()
     {
@@ -50,6 +52,7 @@ public class Order
     {
         _orderItems = new List<OrderItem>();
         _isDraft = false;
+        ShippingNotificationSent = false;
     }
 
     public Order(string userId, string userName, Address address, int cardTypeId, string cardNumber, string cardSecurityNumber,
@@ -61,7 +64,7 @@ public class Order
         OrderDate = DateTime.UtcNow;
         Address = address;
 
-        // Add the OrderStarterDomainEvent to the domain events collection 
+        // Add the OrderStarterDomainEvent to the domain events collection
         // to be raised/dispatched when committing changes into the Database [ After DbContext.SaveChanges() ]
         AddOrderStartedDomainEvent(userId, userName, cardTypeId, cardNumber,
                                     cardSecurityNumber, cardHolderName, cardExpiration);
@@ -69,8 +72,8 @@ public class Order
 
     // DDD Patterns comment
     // This Order AggregateRoot's method "AddOrderItem()" should be the only way to add Items to the Order,
-    // so any behavior (discounts, etc.) and validations are controlled by the AggregateRoot 
-    // in order to maintain consistency between the whole Aggregate. 
+    // so any behavior (discounts, etc.) and validations are controlled by the AggregateRoot
+    // in order to maintain consistency between the whole Aggregate.
     public void AddOrderItem(int productId, string productName, decimal unitPrice, decimal discount, string pictureUrl, int units = 1)
     {
         var existingOrderForProduct = _orderItems.SingleOrDefault(o => o.ProductId == productId);
@@ -98,7 +101,7 @@ public class Order
         BuyerId = buyerId;
         PaymentId = paymentId;
     }
-    
+
     public void SetAwaitingValidationStatus()
     {
         if (OrderStatus == OrderStatus.Submitted)
