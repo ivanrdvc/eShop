@@ -14,6 +14,9 @@ public static class Extensions
 
         builder.AddNpgsqlDataSource("orderingdb");
 
+        // Register catalog data source for product lookups in shipping notifications
+        builder.AddKeyedNpgsqlDataSource("catalogdb", serviceKey: "catalog");
+
         builder.Services.AddOptions<BackgroundTaskOptions>()
             .BindConfiguration(nameof(BackgroundTaskOptions));
 
