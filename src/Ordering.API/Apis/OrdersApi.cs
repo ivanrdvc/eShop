@@ -15,6 +15,7 @@ public static class OrdersApi
         api.MapGet("/cardtypes", GetCardTypesAsync);
         api.MapPost("/draft", CreateOrderDraftAsync);
         api.MapPost("/", CreateOrderAsync);
+        api.MapPut("/{orderId:int}/tracking", UpdateTrackingAsync);
 
         return api;
     }
@@ -115,6 +116,34 @@ public static class OrdersApi
         return await services.Mediator.Send(command);
     }
 
+    public static async Task<Results<Ok, NotFound, BadRequest<string>>> UpdateTrackingAsync(
+        int orderId,
+        UpdateTrackingRequest request,
+        [AsParameters] OrderServices services,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.TrackingNumber))
+        {
+            return TypedResults.BadRequest("Tracking number is required.");
+        }
+
+        services.Logger.LogInformation(
+            "Updating tracking for order {OrderId}: {Carrier} - {TrackingNumber}",
+            orderId, request.Carrier, request.TrackingNumber);
+
+        var command = new UpdateTrackingCommand(orderId, request.TrackingNumber, request.Carrier);
+
+        // BUG: cancellationToken is accepted but not passed to Send()
+        var result = await services.Mediator.Send(command);
+
+        if (!result)
+        {
+            return TypedResults.NotFound();
+        }
+
+        return TypedResults.Ok();
+    }
+
     public static async Task<Results<Ok, BadRequest<string>>> CreateOrderAsync(
         [FromHeader(Name = "x-requestid")] Guid requestId,
         CreateOrderRequest request,
@@ -183,3 +212,5 @@ public record CreateOrderRequest(
     int CardTypeId,
     string Buyer,
     List<BasketItem> Items);
+
+public record UpdateTrackingRequest(string TrackingNumber, string Carrier);

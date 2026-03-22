@@ -24,6 +24,8 @@ public class OrderQueries(OrderingContext context)
             Zipcode = order.Address.ZipCode,
             Status = order.OrderStatus.ToString(),
             Total = order.GetTotal(),
+            TrackingNumber = order.TrackingNumber,
+            Carrier = order.Carrier,
             OrderItems = order.OrderItems.Select(oi => new Orderitem
             {
                 ProductName = oi.ProductName,

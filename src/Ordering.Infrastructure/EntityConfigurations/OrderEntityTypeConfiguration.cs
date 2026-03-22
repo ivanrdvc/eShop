@@ -1,4 +1,4 @@
-﻿namespace eShop.Ordering.Infrastructure.EntityConfigurations;
+namespace eShop.Ordering.Infrastructure.EntityConfigurations;
 
 class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
 {
@@ -23,6 +23,15 @@ class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
         orderConfiguration
             .Property(o => o.PaymentId)
             .HasColumnName("PaymentMethodId");
+
+        orderConfiguration.Property(o => o.TrackingNumber)
+            .HasMaxLength(100);
+
+        orderConfiguration.Property(o => o.Carrier)
+            .HasMaxLength(50);
+
+        orderConfiguration.Property(o => o.ShippingNotificationSent)
+            .HasDefaultValue(false);
 
         orderConfiguration.HasOne<PaymentMethod>()
             .WithMany()

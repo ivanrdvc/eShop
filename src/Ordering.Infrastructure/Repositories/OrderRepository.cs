@@ -1,4 +1,4 @@
-﻿namespace eShop.Ordering.Infrastructure.Repositories;
+namespace eShop.Ordering.Infrastructure.Repositories;
 
 public class OrderRepository
     : IOrderRepository
@@ -34,5 +34,23 @@ public class OrderRepository
     public void Update(Order order)
     {
         _context.Entry(order).State = EntityState.Modified;
+    }
+
+    /// <summary>
+    /// Returns orders that are eligible for shipping based on fulfillment criteria.
+    /// </summary>
+    public async Task<IReadOnlyList<Order>> GetShippableOrdersAsync()
+    {
+        var minimumOrderValue = 10.00m;
+        var maxOrderAgeDays = 30;
+        var cutoffDate = DateTime.UtcNow.AddDays(-maxOrderAgeDays);
+
+        return await _context.Orders
+            .Include(o => o.OrderItems)
+            .Where(o => o.OrderStatus == OrderStatus.Paid)
+            .Where(o => o.OrderDate >= cutoffDate)
+            .Where(o => o.OrderItems.Count > 0)
+            .Where(o => o.OrderItems.Sum(i => i.Units * i.UnitPrice) >= minimumOrderValue)
+            .ToListAsync();
     }
 }
