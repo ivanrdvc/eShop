@@ -11,8 +11,10 @@ namespace eShop.OrderProcessor.Services;
 public class ProductPriceChangedHandler(
     ILogger<ProductPriceChangedHandler> logger) : IIntegrationEventHandler<ProductPriceChangedIntegrationEvent>
 {
-    // Shared price cache used by ShippingNotificationService for notification templates
-    public static readonly ConcurrentDictionary<int, decimal> CurrentPrices = new();
+    // Price cache used by ShippingNotificationService for notification templates.
+    // This is an instance field rather than static because the handler is registered
+    // as a singleton in DI, ensuring a single instance lives for the app lifetime.
+    private readonly ConcurrentDictionary<int, decimal> _currentPrices = new();
 
     public Task Handle(ProductPriceChangedIntegrationEvent @event)
     {
@@ -20,7 +22,7 @@ public class ProductPriceChangedHandler(
             "Updating cached price for product {ProductId}: {OldPrice} -> {NewPrice}",
             @event.ProductId, @event.OldPrice, @event.NewPrice);
 
-        CurrentPrices[@event.ProductId] = @event.NewPrice;
+        _currentPrices[@event.ProductId] = @event.NewPrice;
 
         return Task.CompletedTask;
     }
