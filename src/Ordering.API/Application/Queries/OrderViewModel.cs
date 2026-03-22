@@ -21,6 +21,8 @@ public record Order
     public string Country { get; init; }
     public List<Orderitem> OrderItems { get; set; }
     public decimal Total { get; set; }
+    public string TrackingNumber { get; init; }
+    public string Carrier { get; init; }
 }
 
 public record OrderSummary

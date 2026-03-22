@@ -27,7 +27,9 @@ public class OrderShippedDomainEventHandler
         var order = await _orderRepository.GetAsync(domainEvent.Order.Id);
         var buyer = await _buyerRepository.FindByIdAsync(order.BuyerId.Value);
 
-        var integrationEvent = new OrderStatusChangedToShippedIntegrationEvent(order.Id, order.OrderStatus, buyer.Name, buyer.IdentityGuid);
+        var integrationEvent = new OrderStatusChangedToShippedIntegrationEvent(
+            order.Id, order.OrderStatus, buyer.Name, buyer.IdentityGuid,
+            order.TrackingNumber, order.Carrier);
         await _orderingIntegrationEventService.AddAndSaveEventAsync(integrationEvent);
     }
 }

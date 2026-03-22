@@ -6,13 +6,18 @@ public record OrderStatusChangedToShippedIntegrationEvent : IntegrationEvent
     public OrderStatus OrderStatus { get; }
     public string BuyerName { get; }
     public string BuyerIdentityGuid { get; }
+    public string TrackingNumber { get; }
+    public string Carrier { get; }
 
     public OrderStatusChangedToShippedIntegrationEvent(
-        int orderId, OrderStatus orderStatus, string buyerName, string buyerIdentityGuid)
+        int orderId, OrderStatus orderStatus, string buyerName, string buyerIdentityGuid,
+        string trackingNumber, string carrier)
     {
         OrderId = orderId;
         OrderStatus = orderStatus;
         BuyerName = buyerName;
         BuyerIdentityGuid = buyerIdentityGuid;
+        TrackingNumber = trackingNumber;
+        Carrier = carrier;
     }
 }

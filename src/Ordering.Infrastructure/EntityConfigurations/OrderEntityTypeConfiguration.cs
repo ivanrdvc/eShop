@@ -24,6 +24,12 @@ class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
             .Property(o => o.PaymentId)
             .HasColumnName("PaymentMethodId");
 
+        orderConfiguration.Property(o => o.TrackingNumber)
+            .HasMaxLength(100);
+
+        orderConfiguration.Property(o => o.Carrier)
+            .HasMaxLength(50);
+
         orderConfiguration.HasOne<PaymentMethod>()
             .WithMany()
             .HasForeignKey(o => o.PaymentId)

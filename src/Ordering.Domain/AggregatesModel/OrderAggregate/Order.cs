@@ -34,6 +34,9 @@ public class Order
 
     public int? PaymentId { get; private set; }
 
+    public string TrackingNumber { get; private set; }
+    public string Carrier { get; private set; }
+
     public static Order NewDraft()
     {
         var order = new Order
@@ -165,6 +168,17 @@ public class Order
             var itemsStockRejectedDescription = string.Join(", ", itemsStockRejectedProductNames);
             Description = $"The product items don't have stock: ({itemsStockRejectedDescription}).";
         }
+    }
+
+    public void SetTrackingInfo(string trackingNumber, string carrier)
+    {
+        if (OrderStatus != OrderStatus.Shipped && OrderStatus != OrderStatus.Paid)
+        {
+            throw new OrderingDomainException($"Cannot set tracking info when order status is {OrderStatus}.");
+        }
+
+        TrackingNumber = trackingNumber ?? throw new ArgumentNullException(nameof(trackingNumber));
+        Carrier = carrier;
     }
 
     private void AddOrderStartedDomainEvent(string userId, string userName, int cardTypeId, string cardNumber,
